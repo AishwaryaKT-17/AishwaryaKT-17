@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Resume Builder — Multi-Template</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg: #144487;--card:#fafaff;--accent:#6c63ff;--muted:#6b7280;--navy:#153a4f}
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    body{margin:0;background:linear-gradient(180deg,#fbfbff 0%,var(--bg) 100%);min-height:100vh;color:#111}
+    .wrap{max-width:1180px;margin:20px auto;padding:18px;display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .panel{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 22px rgba(18,25,50,0.06)}
+    h1,h2,h3{margin:0}
+
+    /* FORM */
+    .form-row{display:flex;gap:8px}
+    label{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+    input[type=text], input[type=email], input[type=tel], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-top:6px;font-size:14px;background:transparent}
+    textarea{min-height:80px;resize:vertical}
+    .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn-accent{background:linear-gradient(90deg,var(--accent),#8e77ff);color:white}
+    .btn-ghost{background:transparent;border:1px solid #e6e9ef;color:#334155}
+    .small{font-size:13px;padding:6px 8px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* PREVIEW / CV */
+    .preview-wrap{padding:12px;overflow:auto}
+    .cv{width:842px;min-height:1120px;margin:8px auto;padding:0;background:var(--card);box-shadow:0 10px 30px rgba(20,20,50,0.08);border-radius:4px;display:flex}
+
+    /* Template: professional (navy left sidebar) */
+    .cv.professional{font-size:14px}
+    .cv.professional .left{width:280px;background:var(--navy);color:#fff;padding:28px;padding-top:36px}
+    .cv.professional .right{flex:1;padding:36px;background:#fff}
+    .cv.professional .photo{width:110px;height:110px;border-radius:999px;border:6px solid #fff;overflow:hidden}
+    .cv.professional .name{font-size:28px;font-weight:800;color:#0b2540}
+    .cv.professional .role{font-size:14px;color:var(--muted);margin-top:6px}
+
+    /* Template: modern (accent left colored bar) */
+    .cv.modern .left{width:220px;background:linear-gradient(180deg,#e6f4ff,#fff0ff);padding:28px}
+    .cv.modern .right{flex:1;padding:36px;background:linear-gradient(180deg,#ffffff, #ffffff)}
+    .cv.modern .name{font-size:26px;font-weight:700}
+
+    /* Template: simple (single column) */
+    .cv.simple{flex-direction:column;padding:24px}
+    .cv.simple .left{width:100%;padding:0;margin-bottom:12px}
+    .cv.simple .right{padding:0}
+
+    /* Shared blocks */
+    .left .section-title{font-weight:700;letter-spacing:1px;margin-top:18px;margin-bottom:8px}
+    .muted-light{color:rgba(255,255,255,0.9)}
+    .contact-item{display:flex;align-items:center;gap:8px;margin:8px 0}
+    .skill-pill{display:inline-block;padding:6px 8px;margin:6px 6px 0 0;border-radius:999px;border:1px solid rgba(0,0,0,0.06);font-size:13px}
+    .exp-item{margin-bottom:12px}
+    .hr{height:1px;background:rgba(0,0,0,0.06);margin:12px 0}
+
+    /* responsive */
+    @media (max-width:980px){.wrap{grid-template-columns:1fr;}.cv{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h2>Smart Resume Builder</h2>
+      <label>Template</label>
+      <select id="templateSelect">
+        <option value="professional">Professional (Navy)</option>
+        <option value="modern">Modern</option>
+        <option value="simple">Simple</option>
+      </select>
+
+      <label>Full name</label>
+      <input id="fullName" type="text" placeholder="Richard Sanchez" />
+
+      <label>Headline / Role</label>
+      <input id="headline" type="text" placeholder="Marketing Manager" />
+
+      <label>Email</label>
+      <input id="email" type="email" placeholder="hello@reallygreatsite.com" />
+
+      <label>Phone</label>
+      <input id="phone" type="tel" placeholder="+123-456-7890" />
+
+      <label>Location</label>
+      <input id="location" type="text" placeholder="123 Anywhere St., Any City" />
+
+      <label>Profile photo</label>
+      <input id="photoInput" type="file" accept="image/*" />
+
+      <label>Profile / Summary</label>
+      <textarea id="summary" placeholder="Short professional summary"></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-accent" id="downloadPdf">Download PDF</button>
+        <button class="btn btn-accent" id="downloadImage">Download Image</button>
+        <button class="btn btn-accent" id="shareLink">Open Shareable View</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <h3 style="margin-top:6px">Experience</h3>
+      <div id="expList"></div>
+      <button class="btn small btn-ghost" id="addExp">+ Add Experience</button>
+
+      <div class="hr"></div>
+      <h3>Education</h3>
+      <div id="eduList"></div>
+      <button class="btn small btn-ghost" id="addEdu">+ Add Education</button>
+
+      <div class="hr"></div>
+      <label>Skills (comma separated)</label>
+      <input id="skills" placeholder="Project Management, Leadership" />
+
+      <label>Languages (comma separated)</label>
+      <input id="languages" placeholder="English, Spanish" />
+
+      <div style="margin-top:12px" class="muted">Preview updates as you type. Use "Open Shareable View" to open the current resume in a new tab (temporary URL).</div>
+    </div>
+
+    <div class="panel preview-wrap">
+      <h2 style="margin-top:0">Live Preview</h2>
+      <div id="cv" class="cv professional" data-template="professional">
+        <!-- PROFESSIONAL LAYOUT BY DEFAULT -->
+        <div class="left">
+          <div style="display:flex;align-items:center;gap:14px;flex-direction:column;">
+            <div class="photo" id="photoPreview" style="background:#fff;"></div>
+            <div style="text-align:center;margin-top:12px">
+              <div id="leftName" style="font-weight:800;font-size:16px;">RICHARD SANCHEZ</div>
+              <div id="leftRole" style="font-size:12px;opacity:0.9">MARKETING MANAGER</div>
+            </div>
+          </div>
+
+          <div style="margin-top:20px">
+            <div class="section-title">CONTACT</div>
+            <div class="contact-item muted-light"><span>📧</span><span id="cEmail">hello@reallygreatsite.com</span></div>
+            <div class="contact-item muted-light"><span>📞</span><span id="cPhone">+123-456-7890</span></div>
+            <div class="contact-item muted-light"><span>📍</span><span id="cLocation">123 Anywhere St., Any City</span></div>
+            <div class="contact-item muted-light"><span>🔗</span><span id="cWebsite">www.reallygreatsite.com</span></div>
+          </div>
+
+          <div>
+            <div class="section-title">EDUCATION</div>
+            <div id="pEducationLeft" style="font-size:13px;opacity:0.95;margin-top:8px">Wardiere University • Master of Business Management</div>
+          </div>
+
+          <div>
+            <div class="section-title">SKILLS</div>
+            <div id="pSkillsLeft" style="margin-top:8px"></div>
+          </div>
+
+          <div>
+            <div class="section-title">LANGUAGES</div>
+            <div id="pLangLeft" style="margin-top:8px;font-size:13px;opacity:0.95"></div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div id="pName" class="name">RICHARD SANCHEZ</div>
+              <div id="pRole" class="role">MARKETING MANAGER</div>
+            </div>
+            <div style="text-align:right">
+              <div id="pContactTop" class="muted">hello@reallygreatsite.com • +123-456-7890</div>
+            </div>
+          </div>
+
+          <div style="height:8px"></div>
+          <div id="pSummary" style="font-size:14px;color:#222;line-height:1.5">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+
+          <div style="margin-top:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <h3 style="margin:0">WORK EXPERIENCE</h3>
+            </div>
+            <div id="pExperience" style="margin-top:12px"></div>
+          </div>
+
+          <div style="margin-top:18px">
+            <h3 style="margin:0">REFERENCE</h3>
+            <div style="display:flex;gap:24px;margin-top:12px">
+              <div>
+                <div style="font-weight:700">Estelle Darcy</div>
+                <div style="font-size:13px;color:var(--muted)">Wardiere Inc. / CTO</div>
+                <div style="font-size:13px;color:var(--muted)">hello@reallygreatsite.com</div>
+              </div>
+              <div>
+                <div style="font-weight:700">Harper Richard</div>
+                <div style="font-size:13px;color:var(--muted)">Wardiere Inc. / CEO</div>
+                <div style="font-size:13px;color:var(--muted)">hello@reallygreatsite.com</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // state
+    const state = { exps: [ {title:'Borcelle Studio', role:'Marketing Manager & Specialist', period:'2030 - PRESENT', desc:'Develop and execute comprehensive marketing strategies and campaigns that align with the company\'s goals.'}], edus: [{school:'Wardiere University',deg:'Master of Business Management',period:'2029 - 2030'}] };
+
+    // refs
+    const refs = {
+      fullName: document.getElementById('fullName'), headline: document.getElementById('headline'), email: document.getElementById('email'), phone: document.getElementById('phone'), location: document.getElementById('location'), photoInput: document.getElementById('photoInput'), summary: document.getElementById('summary'), skills: document.getElementById('skills'), languages: document.getElementById('languages'),
+      templateSelect: document.getElementById('templateSelect'), cv: document.getElementById('cv'), photoPreview: document.getElementById('photoPreview'), pName: document.getElementById('pName'), pRole: document.getElementById('pRole'), pContactTop: document.getElementById('pContactTop'), pSummary: document.getElementById('pSummary'), pExperience: document.getElementById('pExperience'),
+      pSkillsLeft: document.getElementById('pSkillsLeft'), pLangLeft: document.getElementById('pLangLeft'), leftName: document.getElementById('leftName'), leftRole: document.getElementById('leftRole'), cEmail: document.getElementById('cEmail'), cPhone: document.getElementById('cPhone'), cLocation: document.getElementById('cLocation'), cWebsite: document.getElementById('cWebsite'), pEducationLeft: document.getElementById('pEducationLeft'), expList: document.getElementById('expList'), eduList: document.getElementById('eduList')
+    };
+
+    // bind inputs
+    ['fullName','headline','email','phone','location','summary','skills','languages'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', updatePreview);
+    });
+
+    refs.photoInput.addEventListener('change', handlePhoto);
+
+    refs.templateSelect.addEventListener('change', ()=>{
+      const t = refs.templateSelect.value; refs.cv.className = 'cv ' + t; refs.cv.dataset.template = t; updatePreview();
+    });
+
+    // experience render
+    function renderExpForm(){ refs.expList.innerHTML=''; state.exps.forEach((e,i)=>{
+      const div = document.createElement('div'); div.style.borderTop='1px dashed #eef2ff'; div.style.paddingTop='8px'; div.innerHTML = `
+        <input data-i='${i}' data-field='title' placeholder='Company' value='${escapeHtml(e.title)}' style='width:60%' />
+        <input data-i='${i}' data-field='period' placeholder='Period' value='${escapeHtml(e.period)}' style='width:35%;margin-left:4px' />
+        <input data-i='${i}' data-field='role' placeholder='Role' value='${escapeHtml(e.role)}' style='width:100%;margin-top:6px' />
+        <textarea data-i='${i}' data-field='desc' placeholder='Short description' style='margin-top:6px'>${escapeHtml(e.desc)}</textarea>
+        <div style='margin-top:6px'><button class='btn small btn-ghost' data-action='remove-exp' data-i='${i}'>Remove</button></div>`;
+      div.querySelectorAll('input,textarea').forEach(el=>el.addEventListener('input', ev=>{ const idx=+ev.target.dataset.i; const field=ev.target.dataset.field; state.exps[idx][field]=ev.target.value; updatePreview(); }));
+      div.querySelector('[data-action]')?.addEventListener('click', ()=>{ state.exps.splice(i,1); renderExpForm(); updatePreview(); });
+      refs.expList.appendChild(div);
+    })}
+
+    function renderEduForm(){ refs.eduList.innerHTML=''; state.edus.forEach((e,i)=>{
+      const div = document.createElement('div'); div.style.borderTop='1px dashed #eef2ff'; div.style.paddingTop='8px'; div.innerHTML = `
+        <input data-i='${i}' data-field='school' placeholder='School' value='${escapeHtml(e.school)}' style='width:65%' />
+        <input data-i='${i}' data-field='period' placeholder='Period' value='${escapeHtml(e.period)}' style='width:30%;margin-left:4px' />
+        <input data-i='${i}' data-field='deg' placeholder='Degree' value='${escapeHtml(e.deg)}' style='width:100%;margin-top:6px' />
+        <div style='margin-top:6px'><button class='btn small btn-ghost' data-action='remove-edu' data-i='${i}'>Remove</button></div>`;
+      div.querySelectorAll('input').forEach(el=>el.addEventListener('input', ev=>{ const idx=+ev.target.dataset.i; const field=ev.target.dataset.field; state.edus[idx][field]=ev.target.value; updatePreview(); }));
+      div.querySelector('[data-action]')?.addEventListener('click', ()=>{ state.edus.splice(i,1); renderEduForm(); updatePreview(); });
+      refs.eduList.appendChild(div);
+    })}
+
+    document.getElementById('addExp').addEventListener('click', ()=>{ state.exps.push({title:'Company', role:'Role', period:'2024 - 2025', desc:'Brief achievements'}); renderExpForm(); updatePreview(); });
+    document.getElementById('addEdu').addEventListener('click', ()=>{ state.edus.push({school:'School', deg:'Degree', period:'2020 - 2024'}); renderEduForm(); updatePreview(); });
+
+    function handlePhoto(e){ const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(ev){ refs.photoPreview.style.backgroundImage = `url(${ev.target.result})`; refs.photoPreview.style.backgroundSize='cover'; refs.photoPreview.style.backgroundPosition='center'; }; reader.readAsDataURL(file);
+    }
+
+    function updatePreview(){
+      refs.pName.textContent = (refs.fullName.value || 'RICHARD SANCHEZ').toUpperCase(); refs.leftName.textContent = (refs.fullName.value || 'RICHARD SANCHEZ').toUpperCase();
+      refs.pRole.textContent = refs.headline.value || 'MARKETING MANAGER'; refs.leftRole.textContent = refs.headline.value || 'MARKETING MANAGER';
+      refs.pContactTop.textContent = [refs.email.value, refs.phone.value].filter(Boolean).join(' • ') || 'hello@reallygreatsite.com • +123-456-7890';
+      refs.cEmail.textContent = refs.email.value || 'hello@reallygreatsite.com'; refs.cPhone.textContent = refs.phone.value || '+123-456-7890'; refs.cLocation.textContent = refs.location.value || '123 Anywhere St., Any City';
+      refs.pSummary.textContent = refs.summary.value || 'A short professional summary that highlights key achievements, skills and career goals.';
+
+      // experience
+      refs.pExperience.innerHTML = ''; state.exps.forEach(e=>{ const d = document.createElement('div'); d.className='exp-item'; d.innerHTML = `<div style='font-weight:700'>${escapeHtml(e.title)} <span style='font-weight:600;color:var(--muted)'>• ${escapeHtml(e.role)}</span></div><div style='font-size:13px;color:var(--muted);margin-top:4px'>${escapeHtml(e.period)}</div><div style='margin-top:6px'>${escapeHtml(e.desc)}</div>`; refs.pExperience.appendChild(d); });
+
+      // education left
+      refs.pEducationLeft.textContent = state.edus.length ? `${state.edus[0].school} • ${state.edus[0].deg}` : '—';
+
+      // skills
+      refs.pSkillsLeft.innerHTML = ''; const skills = refs.skills.value.split(',').map(s=>s.trim()).filter(Boolean); if(skills.length){ skills.forEach(s=>{ const sp = document.createElement('span'); sp.className='skill-pill'; sp.textContent = s; refs.pSkillsLeft.appendChild(sp); }); } else refs.pSkillsLeft.textContent = '—';
+
+      // languages
+      refs.pLangLeft.textContent = refs.languages.value || '—';
+    }
+
+    function escapeHtml(unsafe){ return (unsafe+'').replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m];}); }
+
+    // download PDF
+    document.getElementById('downloadPdf').addEventListener('click', ()=>{
+      const element = refs.cv;
+      const opt = { margin: 0.25, filename: (refs.fullName.value.trim() || 'resume') + '.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
+      // temporarily clone and ensure white background
+      const clone = element.cloneNode(true);
+      clone.style.boxShadow='none'; clone.style.margin='0 auto';
+      const wrapper = document.createElement('div'); wrapper.style.padding='20px'; wrapper.style.background='#fff'; wrapper.appendChild(clone);
+      document.body.appendChild(wrapper);
+      html2pdf().set(opt).from(clone).save().then(()=>{ document.body.removeChild(wrapper); });
+    });
+
+    // download image using html2canvas
+    document.getElementById('downloadImage').addEventListener('click', async ()=>{
+      const el = refs.cv;
+      // enlarge scale for higher quality
+      const canvas = await html2canvas(el, {scale:2, useCORS:true, backgroundColor: null});
+      const data = canvas.toDataURL('image/png');
+      const a = document.createElement('a'); a.href = data; a.download = (refs.fullName.value.trim()||'resume') + '.png'; document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    // shareable view (opens a new tab with the current resume html)
+    document.getElementById('shareLink').addEventListener('click', ()=>{
+      // build a minimal HTML containing the current CV outerHTML and inline styles
+      const dochtml = `<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Shared Resume - ${escapeHtml(refs.fullName.value||'Resume')}</title><style>${document.querySelector('style').innerHTML}</style></head><body><div style='padding:20px;background:#f7f9fc'>${refs.cv.outerHTML}</div></body></html>`;
+      const blob = new Blob([dochtml], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      // note: the generated URL is temporary (session-only)
+    });
+
+    // init
+    renderExpForm(); renderEduForm(); updatePreview();
+  </script>
+</body>
+</html>
